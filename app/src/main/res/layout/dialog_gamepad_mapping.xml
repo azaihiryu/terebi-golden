@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:background="#1E1F25"
+    android:padding="20dp">
+
+    <TextView
+        android:id="@+id/tvDialogTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Press Gamepad Button..."
+        android:textColor="#FFD000"
+        android:textSize="18sp"
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/tvDialogPrompt"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Press the physical button on your external controller to bind to:"
+        android:textColor="#B0B3C6"
+        android:textSize="14sp"
+        android:layout_marginTop="8dp" />
+
+    <TextView
+        android:id="@+id/tvTargetButtonName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="[ Triangle / ○ Button ]"
+        android:textColor="#FFFFFF"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:layout_marginTop="12dp"
+        android:layout_gravity="center_horizontal" />
+
+    <TextView
+        android:id="@+id/tvDetectedKeycode"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Listening for input..."
+        android:textColor="#00E676"
+        android:textSize="13sp"
+        android:layout_marginTop="12dp"
+        android:layout_gravity="center_horizontal" />
+
+</LinearLayout>

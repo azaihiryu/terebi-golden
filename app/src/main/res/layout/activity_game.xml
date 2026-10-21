@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#000000">
+
+    <!-- Game Engine Render Surface -->
+    <SurfaceView
+        android:id="@+id/gameSurfaceView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+    <!-- Onscreen Touch Controls Overlay -->
+    <com.primetimegoldenhourshow.p4gm.ui.TouchOverlayView
+        android:id="@+id/touchOverlayView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+    <!-- Top Overlay HUD Controls (Pause / FPS / Quit) -->
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="8dp"
+        android:background="#99121214"
+        android:padding="6dp">
+
+        <TextView
+            android:id="@+id/tvGameFpsCounter"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="60.0 FPS | 1080p"
+            android:textColor="#FFD000"
+            android:textSize="12sp"
+            android:textStyle="bold"
+            android:paddingEnd="12dp" />
+
+        <ImageButton
+            android:id="@+id/btnPauseGame"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:src="@android:drawable/ic_media_pause"
+            app:tint="#FFFFFF"
+            android:contentDescription="Pause" />
+
+        <ImageButton
+            android:id="@+id/btnExitGame"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:src="@android:drawable/ic_menu_close_clear_cancel"
+            app:tint="#FF5252"
+            android:contentDescription="Exit"
+            android:layout_marginStart="8dp" />
+    </LinearLayout>
+
+</RelativeLayout>

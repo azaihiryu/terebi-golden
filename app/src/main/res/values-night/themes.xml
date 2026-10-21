@@ -1,0 +1,24 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- Base application theme. -->
+    <style name="Theme.TerebiGolden" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <!-- Primary brand color. -->
+        <item name="colorPrimary">@color/p4g_yellow</item>
+        <item name="colorPrimaryVariant">@color/p4g_yellow_dark</item>
+        <item name="colorOnPrimary">@color/p4g_black</item>
+        <!-- Secondary brand color. -->
+        <item name="colorSecondary">@color/p4g_yellow</item>
+        <item name="colorSecondaryVariant">@color/p4g_yellow_dark</item>
+        <item name="colorOnSecondary">@color/p4g_black</item>
+        <!-- Status bar color. -->
+        <item name="android:statusBarColor">#1E1F25</item>
+        <item name="android:windowBackground">#121214</item>
+    </style>
+
+    <style name="Theme.TerebiGolden.FullScreen" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowActionBar">false</item>
+        <item name="android:windowFullscreen">true</item>
+        <item name="android:windowContentOverlay">@null</item>
+        <item name="android:windowBackground">#000000</item>
+    </style>
+</resources>
