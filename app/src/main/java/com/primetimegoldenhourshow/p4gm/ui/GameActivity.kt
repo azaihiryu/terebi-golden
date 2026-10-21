@@ -129,6 +129,7 @@ class GameActivity : AppCompatActivity(), SurfaceHolder.Callback {
     }
 
     override fun surfaceCreated(holder: SurfaceHolder) {
+        P4GNativeEngine.setSurface(holder.surface)
         isGameRunning = true
         mainHandler.post(renderRunnable)
     }
@@ -138,6 +139,7 @@ class GameActivity : AppCompatActivity(), SurfaceHolder.Callback {
     override fun surfaceDestroyed(holder: SurfaceHolder) {
         isGameRunning = false
         mainHandler.removeCallbacks(renderRunnable)
+        P4GNativeEngine.destroySurface()
         P4GNativeEngine.stopEngine()
     }
 

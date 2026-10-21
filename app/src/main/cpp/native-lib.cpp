@@ -1,7 +1,14 @@
 #include <jni.h>
 #include <string>
 #include <android/log.h>
+#include <android/native_window_jni.h>
 #include <sstream>
+
+#include "vfs/vfs_manager.h"
+#include "input/sce_ctrl.h"
+#include "graphics/vulkan_renderer.h"
+#include "graphics/gxm_vulkan_bridge.h"
+#include "recomp/p4g_recomp_core.h"
 
 #define LOG_TAG "P4GNativeEngine"
 #define LOGI(...) __android_log_print(ANDROID_LOG_INFO, LOG_TAG, __VA_ARGS__)
@@ -18,16 +25,7 @@ struct EngineSettings {
     bool fps60Patch = true;
 };
 
-struct InputState {
-    int buttonBitmask = 0;
-    float leftX = 0.0f;
-    float leftY = 0.0f;
-    float rightX = 0.0f;
-    float rightY = 0.0f;
-};
-
 static EngineSettings g_settings;
-static InputState g_inputState;
 static std::string g_gameDirectoryPath = "";
 static bool g_engineInitialized = false;
 static uint64_t g_renderedFrames = 0;
@@ -36,7 +34,7 @@ extern "C" JNIEXPORT jstring JNICALL
 Java_com_primetimegoldenhourshow_p4gm_MainActivity_stringFromJNI(
         JNIEnv* env,
         jobject /* this */) {
-    std::string hello = "Terebi Golden Engine Ready";
+    std::string hello = "Terebi Golden Recomp Core (Vulkan + GXM Bridge) Ready";
     return env->NewStringUTF(hello.c_str());
 }
 
@@ -52,10 +50,45 @@ Java_com_primetimegoldenhourshow_p4gm_native_P4GNativeEngine_initEngine(
         env->ReleaseStringUTFChars(gameDirectoryPath, pathStr);
     }
 
-    LOGI("Initializing P4G Recomp Engine with directory: %s", g_gameDirectoryPath.c_str());
+    LOGI("Initializing P4G Native Engine with SAF path: %s", g_gameDirectoryPath.c_str());
+
+    // Initialize VFS and Recomp Core
+    Terebi::P4GRecompCore::getInstance().initialize(g_gameDirectoryPath);
+
     g_engineInitialized = true;
     g_renderedFrames = 0;
     return JNI_TRUE;
+}
+
+extern "C" JNIEXPORT jboolean JNICALL
+Java_com_primetimegoldenhourshow_p4gm_native_P4GNativeEngine_setSurface(
+        JNIEnv* env,
+        jobject /* this */,
+        jobject surface) {
+
+    if (!surface) {
+        LOGE("setSurface called with null Surface object");
+        return JNI_FALSE;
+    }
+
+    ANativeWindow* window = ANativeWindow_fromSurface(env, surface);
+    if (!window) {
+        LOGE("Failed to extract ANativeWindow from Surface");
+        return JNI_FALSE;
+    }
+
+    LOGI("Initializing Vulkan renderer via ANativeWindow surface");
+    bool success = Terebi::VulkanRenderer::getInstance().initVulkan(window);
+    return success ? JNI_TRUE : JNI_FALSE;
+}
+
+extern "C" JNIEXPORT void JNICALL
+Java_com_primetimegoldenhourshow_p4gm_native_P4GNativeEngine_destroySurface(
+        JNIEnv* /* env */,
+        jobject /* this */) {
+
+    LOGI("Destroying Vulkan Surface");
+    Terebi::VulkanRenderer::getInstance().cleanup();
 }
 
 extern "C" JNIEXPORT jboolean JNICALL
@@ -80,7 +113,7 @@ Java_com_primetimegoldenhourshow_p4gm_native_P4GNativeEngine_configureGraphics(
     g_settings.hudFix = enableHudFix;
     g_settings.fps60Patch = enable60FpsPatch;
 
-    LOGI("Graphics Configured -> Res: %.2fx, Upscaler: %d, Target FPS: %d, VSync: %d, Widescreen: %d",
+    LOGI("Graphics Configured -> Res: %.2fx, Filter: %d, FPS: %d, VSync: %d, FOV Patch: %d",
          resScale, upscalerFilterType, targetFps, enableVsync, enableWidescreenPatch);
 
     return JNI_TRUE;
@@ -96,11 +129,10 @@ Java_com_primetimegoldenhourshow_p4gm_native_P4GNativeEngine_sendInputState(
         jfloat rightStickX,
         jfloat rightStickY) {
 
-    g_inputState.buttonBitmask = buttonBitmask;
-    g_inputState.leftX = leftStickX;
-    g_inputState.leftY = leftStickY;
-    g_inputState.rightX = rightStickX;
-    g_inputState.rightY = rightStickY;
+    // Wire input bitmask to PS Vita's SceCtrlData struct
+    Terebi::InputManager::getInstance().updateInputState(
+        buttonBitmask, leftStickX, leftStickY, rightStickX, rightStickY
+    );
 }
 
 extern "C" JNIEXPORT jstring JNICALL
@@ -109,11 +141,12 @@ Java_com_primetimegoldenhourshow_p4gm_native_P4GNativeEngine_getEngineStatus(
         jobject /* this */) {
 
     std::stringstream ss;
-    ss << "P4G Native Core: " << (g_engineInitialized ? "ACTIVE" : "STANDBY") << "\n";
+    ss << "P4G Core: " << (g_engineInitialized ? "ACTIVE" : "STANDBY") << "\n";
+    ss << "Vulkan Backend: " << (Terebi::VulkanRenderer::getInstance().isInitialized() ? "ONLINE" : "OFFLINE") << "\n";
     ss << "Directory: " << (g_gameDirectoryPath.empty() ? "None" : g_gameDirectoryPath) << "\n";
     ss << "Render Scale: " << g_settings.resScale << "x | FPS Limit: " << g_settings.targetFps << "\n";
     ss << "Widescreen FOV Patch: " << (g_settings.widescreenPatch ? "ENABLED" : "DISABLED") << "\n";
-    ss << "Total Rendered Frames: " << g_renderedFrames;
+    ss << "Rendered Frames: " << g_renderedFrames;
 
     return env->NewStringUTF(ss.str().c_str());
 }
@@ -125,6 +158,7 @@ Java_com_primetimegoldenhourshow_p4gm_native_P4GNativeEngine_renderFrame(
 
     if (!g_engineInitialized) return JNI_FALSE;
 
+    Terebi::P4GRecompCore::getInstance().renderFrame();
     g_renderedFrames++;
     return JNI_TRUE;
 }
@@ -134,6 +168,8 @@ Java_com_primetimegoldenhourshow_p4gm_native_P4GNativeEngine_stopEngine(
         JNIEnv* /* env */,
         jobject /* this */) {
 
-    LOGI("Stopping P4G Native Core Engine");
+    LOGI("Stopping P4G Native Engine");
+    Terebi::P4GRecompCore::getInstance().shutdown();
+    Terebi::VulkanRenderer::getInstance().cleanup();
     g_engineInitialized = false;
 }

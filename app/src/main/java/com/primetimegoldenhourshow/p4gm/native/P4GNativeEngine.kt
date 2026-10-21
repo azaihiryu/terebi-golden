@@ -1,6 +1,7 @@
 package com.primetimegoldenhourshow.p4gm.native
 
 import android.util.Log
+import android.view.Surface
 
 object P4GNativeEngine {
 
@@ -19,6 +20,16 @@ object P4GNativeEngine {
      * Initializes the native engine with the P4G Vita game folder path or URI.
      */
     external fun initEngine(gameDirectoryPath: String): Boolean
+
+    /**
+     * Connects ANativeWindow surface from SurfaceView to Vulkan renderer.
+     */
+    external fun setSurface(surface: Surface): Boolean
+
+    /**
+     * Destroys the Vulkan surface when surface is destroyed.
+     */
+    external fun destroySurface()
 
     /**
      * Configures graphic upscaler, resolution scale, FPS limit, VSync, aspect ratio, widescreen patch, and HUD fixes.
